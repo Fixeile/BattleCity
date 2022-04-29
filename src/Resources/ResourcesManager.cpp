@@ -1,9 +1,15 @@
 #include "ResourcesManager.h"
 #include "../Renderer/ShaderProgram.h"
+#include "../Renderer/Texture2D.h"
 
 #include <sstream>
 #include <fstream>
 #include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_PNG
+#include "stb_image.h"
+
 
 using namespace std;
 
@@ -28,7 +34,9 @@ string ResourcesManager::GetFileString(const string& relativeFilePath) const
 	return buffer.str();
 }
 
-shared_ptr<Renderer::ShaderProgram> ResourcesManager::loadShaders(const string& shaderName, const string& vertexPath, const string& fragmentPath)
+shared_ptr<Renderer::ShaderProgram> ResourcesManager::loadShaders(const string& shaderName,
+																	const string& vertexPath, 
+																	const string& fragmentPath)
 {
 	string vertexString = GetFileString(vertexPath);
 	if (vertexString.empty())
@@ -44,7 +52,8 @@ shared_ptr<Renderer::ShaderProgram> ResourcesManager::loadShaders(const string& 
 		return nullptr;
 	}
 
-	shared_ptr<Renderer::ShaderProgram>& newShader = m_shaderPrograms.emplace(shaderName, make_shared< Renderer::ShaderProgram>(vertexString, fragmentString)).first->second;
+	shared_ptr<Renderer::ShaderProgram>& newShader = m_shaderPrograms.emplace(shaderName,
+		make_shared< Renderer::ShaderProgram>(vertexString, fragmentString)).first->second;
 	if (newShader->isCompiled())
 	{
 		return newShader;
@@ -65,5 +74,37 @@ shared_ptr<Renderer::ShaderProgram> ResourcesManager::getShaderPrograms(const st
 		return it->second;
 	}
 	cerr << "Can`t Find the shader programs: " << shaderName << endl;
+	return nullptr;
+}
+
+shared_ptr<Renderer::Texture2D> ResourcesManager::loadTexture(const string& textureName, const string& texturePath)
+{
+	int channels = 0;
+	int width = 0;
+	int height = 0;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char* pixels = stbi_load(string(m_path + "/" + texturePath).c_str(), &width, &height, &channels, 0);
+
+	if (!pixels)
+	{
+		cerr << "Can`t load image: " << texturePath << endl;
+		return nullptr;
+	}
+
+	shared_ptr<Renderer::Texture2D> newTexture = m_texture.emplace(textureName,
+		make_shared<Renderer::Texture2D>(width, height, pixels, channels,
+			GL_NEAREST, GL_CLAMP_TO_EDGE)).first->second;
+	stbi_image_free(pixels);
+	return newTexture;
+}
+
+shared_ptr<Renderer::Texture2D> ResourcesManager::getTexture(const string& textureName)
+{
+	TextureMap::const_iterator it = m_texture.find(textureName);
+	if (it != m_texture.end())
+	{
+		return it->second;
+	}
+	cerr << "Can`t Find the texture: " << textureName << endl;
 	return nullptr;
 }
