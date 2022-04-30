@@ -15,15 +15,17 @@ namespace Renderer {
 		{
 		case 4:
 			m_mode = GL_RGBA;
+			break;
 		case 3:
 			m_mode = GL_RGB;
-
+			break;
 		default:
 			m_mode = GL_RGBA;
 			break;
 		}
 
 		glGenTextures(1, &M_ID);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, M_ID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Width, m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
