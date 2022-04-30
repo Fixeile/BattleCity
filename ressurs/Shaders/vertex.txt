@@ -6,9 +6,12 @@ in  vec2 in_textureColors;
 out vec3 ex_Color;
 out vec2 ex_TextureColors;
 
+uniform mat4 modelMat;
+uniform mat4 projectionMat;
+
 void main(void)
 {
-	gl_Position = vec4(in_Position, 1.0);
+	gl_Position = projectionMat * modelMat * vec4(in_Position, 1.0);
 	ex_Color = in_Color;
 	ex_TextureColors = in_textureColors;
 }
