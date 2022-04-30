@@ -49,7 +49,7 @@ namespace Renderer {
 		return *this;
 	}
 
-	Texture2D::Texture2D(Texture2D&& texture2d)
+	Texture2D::Texture2D(Texture2D&& texture2d) noexcept
 	{
 		M_ID = texture2d.M_ID;
 		texture2d.M_ID = 0;
